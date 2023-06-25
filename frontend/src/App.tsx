@@ -1,28 +1,84 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, createContext } from "react"
+import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom"
 
-// testAPIを呼び出すメソッドをimport
-import { execTest } from "lib/api/test"
+import CommonLayout from "components/layouts/CommonLayout"
+import Home from "components/pages/Home"
+import SignUp from "components/pages/SignUp"
+import SignIn from "components/pages/SignIn"
+
+import { getCurrentUser } from "lib/api/auth"
+import { User } from "interfaces/index"
+
+// グローバルで扱う変数・関数
+export const AuthContext = createContext({} as {
+  loading: boolean
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  isSignedIn: boolean
+  setIsSignedIn: React.Dispatch<React.SetStateAction<boolean>>
+  currentUser: User | undefined
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | undefined>>
+})
 
 const App: React.FC = () => {
-  // useStateで変数messageを宣言
-  const [message, setMessage] = useState<string>("")
+  const [loading, setLoading] = useState<boolean>(true)
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(false)
+  const [currentUser, setCurrentUser] = useState<User | undefined>()
 
-  // apiを叩いてレスポンスを変数に入れるメソッドを宣言
-  const handleExecTest = async () => {
-    const res = await execTest()
 
-    if (res.status === 200) {
-      setMessage(res.data.message)
+  // 認証済みのユーザーがいるかどうかチェック
+  // 確認できた場合はそのユーザーの情報を取得
+  const handleGetCurrentUser = async () => {
+    try {
+      const res = await getCurrentUser()
+      console.log(res)
+
+      if (res?.status === 200) {
+        setIsSignedIn(true)
+        setCurrentUser(res?.data.currentUser)
+      } else {
+        console.log("No current user")
+      }
+    } catch (err) {
+      console.log(err)
+    }
+
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    handleGetCurrentUser()
+  }, [setCurrentUser])
+
+  // ユーザーが認証済みかどうかでルーティングを決定
+  // 未認証だった場合は「/signin」ページに促す
+  const Private = ({ children }: { children: React.ReactElement }) => {
+    if (!loading) {
+      if (isSignedIn) {
+        return children
+      } else {
+        return <Redirect to="/signin" />
+      }
+    } else {
+      return <></>
     }
   }
 
-  // 第2引数の値が変わったときのみ、第1引数の処理を実行する
-  useEffect(() => {
-    handleExecTest()
-  }, [])
-
   return (
-    <h1>{message}</h1>
+    <Router>
+      <AuthContext.Provider value={({ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser})}>
+        <CommonLayout>
+          <Switch>
+            <Route exact path="/signup" component={SignUp} />
+            <Route exact path="/signin" component={SignIn} />
+            <Private>
+              <Switch>
+                <Route exact path="/" component={Home} />
+              </Switch>
+            </Private>
+          </Switch>
+        </CommonLayout>
+      </AuthContext.Provider>
+    </Router>
   )
 }
 

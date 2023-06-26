@@ -65,7 +65,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <AuthContext.Provider value={({ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser})}>
+      <AuthContext.Provider value={{ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser}}>
         <CommonLayout>
           <Switch>
             <Route exact path="/signup" component={SignUp} />

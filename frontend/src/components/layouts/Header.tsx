@@ -35,7 +35,7 @@ const Header: React.FC = ()  => {
   const classes = useStyles()
   const history = useHistory()
 
-  const handleSignOut = async (e: React.MouseEvent<HTMLButtonEvent>) => {
+  const handleSignOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
     try {
       const res = await signOut()
 

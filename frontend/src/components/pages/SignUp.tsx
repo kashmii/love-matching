@@ -67,7 +67,7 @@ const SignUp: React.FC = () => {
         setIsSignedIn(true)
         setCurrentUser(res.data.data)
 
-        histroy.push("/")
+        history.push("/")
 
         console.log("Signed in successfully!")
       } else {

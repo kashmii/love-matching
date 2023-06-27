@@ -40,6 +40,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 // サインイン用ページ
 const SignIn: React.FC = () => {
+  console.log("change!")
   const classes = useStyles()
   const history = useHistory()
 
